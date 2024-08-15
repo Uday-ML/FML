@@ -1,0 +1,223 @@
+"""
+Naive Bayes Classifier
+
+This class implements a Naive Bayes classifier for multi-class classification tasks. It supports various types of feature distributions such as Gaussian, Bernoulli, Laplace, Exponential, and Multinomial.
+
+Attributes:
+    X_train (list): Features of the training data.
+    y_train (list): Labels of the training data.
+    no_of_features (int): Number of features in the training data.
+    no_of_classes (int): Number of unique classes in the training labels.
+    distribution (list): List specifying the type of distribution for each feature.
+    X_parameters (list): List storing distribution parameters for each feature and class.
+    y_parameters (list): Prior probabilities for each class.
+    individual_features (list): List storing individual feature values for later use.
+
+Methods:
+    __init__(self, X_train, y_train):
+        """
+        Initializes the NaiveBayes class with training data.
+
+        Parameters:
+        - X_train (list): Features of the training data.
+        - y_train (list): Labels of the training data.
+        """
+        
+        # Store training data and calculate necessary parameters
+        ...
+
+    estimate_prior_y(self, y):
+        """
+        Estimates prior probabilities for each class based on the training labels.
+
+        Parameters:
+        - y (list): Labels of the training data.
+
+        Returns:
+        - list: Prior probabilities for each class.
+        """
+        ...
+
+    save_x_distribution(self, feature_no, distribution):
+        """
+        Saves the distribution type for a specific feature.
+
+        Parameters:
+        - feature_no (int): Index of the feature.
+        - distribution (str): Type of distribution ("gaussian", "bernoulli", "laplace", "exponential", "multinomial").
+        """
+        ...
+
+    fit_x_estimators(self):
+        """
+        Fits distribution parameters for each feature based on the saved distribution type.
+        """
+        ...
+
+    find_x_distribution_parameters(self, feature_no):
+        """
+        Finds distribution parameters for a specific feature and class.
+
+        Parameters:
+        - feature_no (int): Index of the feature.
+        """
+        ...
+
+    predict(self, X_test):
+        """
+        Predicts class labels for the given test data using the Naive Bayes classifier.
+
+        Parameters:
+        - X_test (list): Features of the test data.
+
+        Returns:
+        - list: Predicted labels for the test data.
+        """
+        ...
+
+    # Various distribution estimation methods
+
+    estimate_gaussian(self, x, y, class_no):
+        """
+        Estimates Gaussian distribution parameters for a specific feature and class.
+
+        Parameters:
+        - x (list): Feature values.
+        - y (list): Labels of the training data.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - dict: Gaussian distribution parameters (mean and variance).
+        """
+        mean = sum(x[y == class_no]) / len(x[y == class_no])
+        var = sum((x[y == class_no] - mean) ** 2) / len(x[y == class_no])
+        return {"mean": mean, "var": var}
+
+    estimate_bernoulli(self, x, y, class_no):
+        """
+        Estimates Bernoulli distribution parameters for a specific feature and class.
+
+        Parameters:
+        - x (list): Feature values.
+        - y (list): Labels of the training data.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - dict: Bernoulli distribution parameters (mean).
+        """
+        mean = sum(x[y == class_no]) / len(x[y == class_no])
+        return {"mean": mean}
+
+    estimate_laplace(self, x, y, class_no):
+        """
+        Estimates Laplace distribution parameters for a specific feature and class.
+
+        Parameters:
+        - x (list): Feature values.
+        - y (list): Labels of the training data.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - dict: Laplace distribution parameters (mean and b).
+        """
+        required_x = x[y == class_no]
+        mean = np.median(required_x)
+        b = np.median(np.abs(required_x - mean)) / 0.6745  # 0.6745 is the scaling factor for the median absolute deviation
+        return {"mean": mean, "b": b}
+
+    estimate_exponential(self, x, y, class_no):
+        """
+        Estimates Exponential distribution parameters for a specific feature and class.
+
+        Parameters:
+        - x (list): Feature values.
+        - y (list): Labels of the training data.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - dict: Exponential distribution parameters (lambda_value).
+        """
+        lambda_value = len(x[y == class_no]) / sum(x[y == class_no])
+        return {"lambda_value": lambda_value}
+
+    estimate_multinomial(self, x, y, class_no):
+        """
+        Estimates Multinomial distribution parameters for a specific feature and class.
+
+        Parameters:
+        - x (list): Feature values.
+        - y (list): Labels of the training data.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - dict: Multinomial distribution parameters (mean).
+        """
+        no_of_x_classes = int(max(x) + 1)
+        mean = np.zeros(no_of_x_classes)
+        for i in range(no_of_x_classes):
+            mean[i] = sum(x[y == class_no] == i) / len(x[y == class_no])
+        return {"mean": mean}
+
+    # Various fitting methods for different distributions
+
+    fit_gaussian(self, x, feature_no, class_no):
+        """
+        Fits Gaussian distribution for a specific feature and class.
+
+        Parameters:
+        - x (float): Feature value.
+        - feature_no (int): Index of the feature.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - float: Log probability of the feature value.
+        """
+        mean = self.X_parameters[feature_no][class_no]['mean']
+        var = self.X_parameters[feature_no][class_no]['var']
+        return -0.5 * ((x - mean) ** 2 / var + np.log(2 * np.pi * var))
+
+    fit_bernoulli(self, x, feature_no, class_no):
+        """
+        Fits Bernoulli distribution for a specific feature and class.
+
+        Parameters:
+        - x (float): Feature value.
+        - feature_no (int): Index of the feature.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - float: Log probability of the feature value.
+        """
+        mean = self.X_parameters[feature_no][class_no]['mean']
+        return np.log(x * mean + (1 - x) * (1 - mean))
+
+    fit_laplace(self, x, feature_no, class_no):
+        """
+        Fits Laplace distribution for a specific feature and class.
+
+        Parameters:
+        - x (float): Feature value.
+        - feature_no (int): Index of the feature.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - float: Log probability of the feature value.
+        """
+        mean = self.X_parameters[feature_no][class_no]['mean']
+        b = self.X_parameters[feature_no][class_no]['b']
+        return -np.abs(x - mean) / b - np.log(2 * b)
+
+    fit_exponential(self, x, feature_no, class_no):
+        """
+        Fits Exponential distribution for a specific feature and class.
+
+        Parameters:
+        - x (float): Feature value.
+        - feature_no (int): Index of the feature.
+        - class_no (int): Index of the class.
+
+        Returns:
+        - float: Log probability of the feature value.
+        """
+        lambda_value = self.X_parameters[feature_no][class_no]['lambda_value']
+        return np.log(lambda_value) - lambda_value * x

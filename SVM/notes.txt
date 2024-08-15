@@ -1,0 +1,11 @@
+To make in SVM:
+    1. file name Support_Vector_Machines.py
+    2. class name SVM
+    3. from fml_library.Support_Vector_Machines import SVM
+    4. model = new SVM()
+
+Others:
+    1. create a file for all used numpy functionalities
+    2. create a file for all the metrics and data seperations based on required percentage
+    3. create a good documentation for using all the things used in the fml_library
+    
